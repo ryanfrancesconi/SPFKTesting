@@ -25,7 +25,7 @@ private let targets: [PackageDescription.Target] = [
             
         ],
         resources: [
-            .process("Resources")
+            .process("Resources") // all test files should be in here
         ]
     ),
 
