@@ -42,6 +42,10 @@ extension BundleResources {
         resource(named: "toc_many_children.mp3")
     }
 
+    public var cowbell_wav: URL {
+        resource(named: "cowbell.wav")
+    }
+
     public var sharksandwich: URL {
         resource(named: "sharksandwich.jpg")
     }
