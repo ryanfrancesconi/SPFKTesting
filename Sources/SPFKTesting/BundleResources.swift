@@ -37,6 +37,10 @@ extension BundleResources {
     public var tabla_wav: URL {
         resource(named: "tabla.wav")
     }
+    
+    public var tabla_6_channel: URL {
+        resource(named: "tabla_6_channel.wav")
+    }
 
     public var toc_many_children: URL {
         resource(named: "toc_many_children.mp3")
@@ -49,4 +53,13 @@ extension BundleResources {
     public var sharksandwich: URL {
         resource(named: "sharksandwich.jpg")
     }
+
+    public var pink_noise: URL {
+        resource(named: "pink_noise.wav")
+    }
+
+    public var no_data_chunk: URL {
+        resource(named: "no_data_chunk.wav")
+    }
+    
 }
