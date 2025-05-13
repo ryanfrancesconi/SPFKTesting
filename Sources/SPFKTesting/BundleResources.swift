@@ -17,6 +17,10 @@ public class BundleResources: AnyObject {
     public func resource(named name: String) -> URL {
         resourcesDirectory.appendingPathComponent(name)
     }
+    
+    public var audioCases: [URL] {
+        [mp3_id3, wav_bext_v2, tabla_mp4, tabla_wav, tabla_6_channel, cowbell_wav, pink_noise]
+    }
 }
 
 // MARK: - Test files
