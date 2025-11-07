@@ -3,31 +3,41 @@ import Foundation
 public class TestBundleResources: BundleResources {
     public static let shared = TestBundleResources(bundleURL: Bundle.module.bundleURL)
 
-    public var audioCases: [URL] {
-        [mp3_id3, wav_bext_v2, tabla_mp4, tabla_wav, tabla_6_channel, cowbell_wav, pink_noise]
-    }
+    public var audioCases: [URL] { [
+        mp3_id3, wav_bext_v2, tabla_mp4, tabla_wav, tabla_6_channel, cowbell_wav, pink_noise,
+    ] }
 
-    public var formats: [URL] {
-        [
-            tabla_aac,
-            tabla_aif,
-            tabla_flac,
-            tabla_m4a,
-            tabla_mp3,
-            tabla_mp4,
-            tabla_ogg,
-            tabla_wav,
-        ]
-    }
+    public var formats: [URL] { [
+        tabla_aac,
+        tabla_aif,
+        tabla_flac,
+        tabla_m4a,
+        tabla_mp3,
+        tabla_mp4,
+        tabla_ogg,
+        tabla_wav,
+    ] }
 }
 
-// MARK: - Test files
+// MARK: - Audio
 
 extension TestBundleResources {
+    public var mp3_no_metadata: URL {
+        resource(named: "no metadata.mp3")
+    }
+
+    public var mp3_xmp: URL {
+        resource(named: "xmp.mp3")
+    }
+
     public var mp3_id3: URL {
         resource(named: "and-oh-how-they-danced.mp3")
     }
 
+    public var wav_bext_v1: URL {
+        resource(named: "123456789_60BPM_48k.wav")
+    }
+    
     public var wav_bext_v2: URL {
         resource(named: "and-oh-how-they-danced.wav")
     }
@@ -80,15 +90,19 @@ extension TestBundleResources {
         resource(named: "cowbell.wav")
     }
 
-    public var sharksandwich: URL {
-        resource(named: "sharksandwich.jpg")
-    }
-
     public var pink_noise: URL {
         resource(named: "pink_noise.wav")
     }
 
     public var no_data_chunk: URL {
         resource(named: "no_data_chunk.wav")
+    }
+}
+
+// MARK: - Images
+
+extension TestBundleResources {
+    public var sharksandwich: URL {
+        resource(named: "sharksandwich.jpg")
     }
 }
