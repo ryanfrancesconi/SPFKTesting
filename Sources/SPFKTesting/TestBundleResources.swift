@@ -37,9 +37,13 @@ extension TestBundleResources {
     public var wav_bext_v1: URL {
         resource(named: "123456789_60BPM_48k.wav")
     }
-    
+
     public var wav_bext_v2: URL {
         resource(named: "and-oh-how-they-danced.wav")
+    }
+
+    public var wav_bext_v2b: URL {
+        resource(named: "and-oh-how-they-danced_2.wav")
     }
 
     public var tabla_aac: URL {
