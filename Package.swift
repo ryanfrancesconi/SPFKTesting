@@ -7,7 +7,8 @@ import PackageDescription
 private let name: String = "SPFKTesting"
 
 private let platforms: [PackageDescription.SupportedPlatform]? = [
-    .macOS(.v12)
+    .macOS(.v12),
+    .iOS(.v15),
 ]
 
 private let products: [PackageDescription.Product] = [
@@ -33,9 +34,6 @@ private let targets: [PackageDescription.Target] = [
         name: "\(name)Tests",
         dependencies: [
             .byNameItem(name: name, condition: nil),
-        ],
-        resources: [
-            .process("Resources")
         ]
     )
 ]

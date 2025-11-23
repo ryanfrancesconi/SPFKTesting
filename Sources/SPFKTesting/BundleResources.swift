@@ -8,11 +8,18 @@ public class BundleResources: @unchecked Sendable {
         self.bundleURL = bundleURL
     }
 
-    public var resourcesDirectory: URL {
-        bundleURL
-            .appendingPathComponent("Contents")
-            .appendingPathComponent("Resources")
-    }
+    #if os(macOS)
+        public var resourcesDirectory: URL {
+            bundleURL
+                .appendingPathComponent("Contents")
+                .appendingPathComponent("Resources")
+        }
+    
+    #elseif os(iOS)
+        public var resourcesDirectory: URL {
+            bundleURL
+        }
+    #endif
 
     /// Look in the bundle for the file name requested
     public func resource(named name: String) -> URL {
