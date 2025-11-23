@@ -1,7 +1,7 @@
 import Foundation
 
-public class BundleResources {
-    public var bundleURL: URL
+public class BundleResources: @unchecked Sendable {
+    public let bundleURL: URL
 
     // Bundle.module.bundleURL
     public init(bundleURL: URL) {

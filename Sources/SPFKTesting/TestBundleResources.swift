@@ -1,6 +1,6 @@
 import Foundation
 
-public class TestBundleResources: BundleResources {
+public final class TestBundleResources: BundleResources, @unchecked Sendable {
     public static let shared = TestBundleResources(bundleURL: Bundle.module.bundleURL)
 
     public var audioCases: [URL] { [
