@@ -3,8 +3,7 @@
 
 import PackageDescription
 
-// Swift target
-private let name: String = "SPFKTesting"
+private let name: String = "SPFKTesting" // Swift target
 
 private let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12)
