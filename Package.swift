@@ -30,7 +30,7 @@ private let targets: [PackageDescription.Target] = [
     .testTarget(
         name: "\(name)Tests",
         dependencies: [
-            .byNameItem(name: name, condition: nil),
+            .byNameItem(name: name, condition: nil)
         ]
     )
 ]
