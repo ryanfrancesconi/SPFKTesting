@@ -38,6 +38,10 @@ extension TestBundleResources {
         resource(named: "123456789_60BPM_48k.wav")
     }
 
+    public var counting_123456789_60BPM_48k: URL {
+        wav_bext_v1
+    }
+
     public var wav_bext_v2: URL {
         resource(named: "and-oh-how-they-danced.wav")
     }
