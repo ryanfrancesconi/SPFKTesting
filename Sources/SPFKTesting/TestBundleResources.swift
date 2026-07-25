@@ -279,4 +279,10 @@ extension TestBundleResources {
     public var sharksandwich_webp: URL {
         internalResources.resource(named: "sharksandwich.webp")
     }
+
+    /// A real photograph (yellow warbler on a branch) with an unambiguous subject,
+    /// for testing ML image classification against genuine framework output.
+    public var songbird: URL {
+        internalResources.resource(named: "songbird.jpg")
+    }
 }
