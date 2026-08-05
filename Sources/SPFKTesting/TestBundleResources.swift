@@ -281,6 +281,24 @@ extension TestBundleResources {
     public var sample_mov: URL {
         internalResources.resource(named: "sample.mov")
     }
+
+    /// The same content as ``sample_mov``, remuxed into a Matroska container:
+    ///
+    ///     ffmpeg -i sample.mov -c copy \
+    ///       -metadata title="SPFK Sample Matroska" -metadata artist="Spongefork" sample.mkv
+    ///
+    /// `-c copy` rather than a re-encode, so the streams are bit-identical to the `.mov` and any
+    /// difference a test observes is the *container*, which is the only thing Matroska changes.
+    /// Carries `title` and `artist` so a read can be asserted without writing first.
+    ///
+    /// **AVFoundation cannot open this file** — Matroska is absent from
+    /// `AVURLAsset.audiovisualTypes()`. That is the point of the fixture: it exercises the
+    /// TagLib-backed metadata path for a container the AV stack refuses, so anything reaching for
+    /// `AVAsset` fails loudly here instead of silently working via a format that happens to be
+    /// supported.
+    public var sample_mkv: URL {
+        internalResources.resource(named: "sample.mkv")
+    }
 }
 
 // MARK: - Images
