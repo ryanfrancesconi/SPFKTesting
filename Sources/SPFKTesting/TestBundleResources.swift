@@ -346,6 +346,33 @@ extension TestBundleResources {
     public var sample_mka: URL {
         internalResources.resource(named: "sample.mka")
     }
+
+    /// ``sample_mkv`` with its `SeekHead` rewritten into the two-level form real muxers write: the
+    /// one at the head of the file names a *second* `SeekHead` rather than naming `Cues` directly,
+    /// and that second one names `Cues`.
+    ///
+    /// Byte-for-byte identical to ``sample_mkv`` everywhere else — the replacement `SeekHead` is
+    /// built inside the existing `Void` padding, so no offset moves and the file is the same
+    /// length. ffmpeg writes the flat form, which is why ``sample_mkv`` alone cannot cover this.
+    ///
+    /// The reason it matters: libwebm keeps only the *first* `SeekHead` and never follows a nested
+    /// one, so a reader that stops at what libwebm parsed finds no index here and silently falls
+    /// back to the start of the file. Against a film that reads as a black poster frame.
+    public var sample_nested_seekhead_mkv: URL {
+        internalResources.resource(named: "sample-nested-seekhead.mkv")
+    }
+
+    /// ``sample_mkv`` with its `Cues` rewritten so video and audio cue points interleave — each cue
+    /// point names one track, and the audio ones sit between the video keyframes.
+    ///
+    /// The shape a muxer that indexes every track produces. It matters because looking a cue point
+    /// up by time and *then* asking it for a track finds the audio point nearest the target and
+    /// gives up, which is the case libwebm's own `Cues::Find` documents as wrong in a `TODO`.
+    /// Seeking video to 1.5 s here lands on the 1300 ms audio cue point under that algorithm and on
+    /// the 1048 ms video keyframe under a correct one.
+    public var sample_interleaved_cues_mkv: URL {
+        internalResources.resource(named: "sample-interleaved-cues.mkv")
+    }
 }
 
 // MARK: - Images
