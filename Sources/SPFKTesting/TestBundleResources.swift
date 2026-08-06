@@ -299,6 +299,38 @@ extension TestBundleResources {
     public var sample_mkv: URL {
         internalResources.resource(named: "sample.mkv")
     }
+
+    /// The same content as ``sample_mov`` re-encoded into WebM:
+    ///
+    ///     ffmpeg -i sample.mov -c:v libvpx-vp9 -crf 40 -b:v 0 -g 15 -c:a libopus -b:a 24k \
+    ///       -metadata title="SPFK Sample WebM" -metadata artist="Spongefork" sample.webm
+    ///
+    /// A re-encode rather than the `-c copy` used for ``sample_mkv``, because WebM admits neither
+    /// H.264 nor AAC — so this is VP9 video and Opus audio (resampled to Opus's native 48 kHz),
+    /// still 160x120 and 2 seconds with a keyframe every 15 frames.
+    ///
+    /// Exists to prove the claim that one Matroska parser covers both containers: WebM is a
+    /// Matroska profile, and the only thing that should differ is the EBML `DocType`. It is also
+    /// the fixture that covers an **absent `CodecPrivate`** — VP9 needs no out-of-band setup data
+    /// and carries none, where H.264 carries an `avcC`, so a code path that assumes every video
+    /// track has one fails here and only here.
+    public var sample_webm: URL {
+        internalResources.resource(named: "sample.webm")
+    }
+
+    /// ``sample_mov``'s audio track alone, in a Matroska container:
+    ///
+    ///     ffmpeg -i sample.mov -vn -c:a copy \
+    ///       -metadata title="SPFK Sample Matroska Audio" -metadata artist="Spongefork" sample.mka
+    ///
+    /// `-c copy`, so the AAC is bit-identical to the one in ``sample_mov`` and ``sample_mkv``.
+    ///
+    /// The audio-only case, which `.mka` is Matroska's own extension for. Worth having separately
+    /// because a video-bearing file cannot exercise it: anything reaching for a video track finds
+    /// one in ``sample_mkv`` and silently works, where here there is none to find.
+    public var sample_mka: URL {
+        internalResources.resource(named: "sample.mka")
+    }
 }
 
 // MARK: - Images
