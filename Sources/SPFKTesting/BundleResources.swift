@@ -10,18 +10,16 @@ public final class BundleResources: Sendable {
         self.bundleURL = bundleURL
     }
 
-    #if os(macOS)
-        public var resourcesDirectory: URL {
-            bundleURL
-                .appendingPathComponent("Contents")
-                .appendingPathComponent("Resources")
-        }
-
-    #elseif os(iOS)
-        public var resourcesDirectory: URL {
-            bundleURL
-        }
-    #endif
+    /// Where the bundle's resources are. Never assume a layout: Xcode writes macOS bundles with
+    /// `Contents/Resources`, SwiftPM's CLI build writes them flat, and both occur on the same
+    /// platform. Falls back to the bundle URL for a URL that names no bundle.
+    ///
+    /// `absoluteURL` is load-bearing: `Bundle.resourceURL` carries a `baseURL`, and `URL`'s `==`
+    /// compares the relative string and base rather than the resolved path — so a relative form
+    /// resolves to the right file while comparing unequal to every absolute URL of it.
+    public var resourcesDirectory: URL {
+        (Bundle(url: bundleURL)?.resourceURL ?? bundleURL).absoluteURL
+    }
 
     /// Look in the bundle for the file name requested
     public func resource(named name: String) -> URL {
