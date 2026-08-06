@@ -118,6 +118,21 @@ extension TestBundleResources {
         internalResources.resource(named: "tabla.m4a")
     }
 
+    /// ``tabla_m4a``'s AAC remuxed into Matroska, bit-identical:
+    ///
+    ///     ffmpeg -i tabla.m4a -c:a copy \
+    ///       -metadata title="SPFK Tabla Matroska" -metadata artist="Spongefork" tabla.mka
+    ///
+    /// The audio fixture for Matroska work, because **`sample.mkv`'s audio track is digital
+    /// silence** (-91 dB, verified with `ffmpeg -af volumedetect`) — it exists to make track counts
+    /// testable, not signal. A decoder tested only against that passes while producing nothing but
+    /// zeros. This carries real signal (-0.1 dB peak) and has an exact reference in ``tabla_m4a``,
+    /// which AVFoundation opens normally, so decoded output can be compared rather than merely
+    /// counted.
+    public var tabla_mka: URL {
+        internalResources.resource(named: "tabla.mka")
+    }
+
     public var tabla_6_channel: URL {
         internalResources.resource(named: "tabla_6_channel.wav")
     }
