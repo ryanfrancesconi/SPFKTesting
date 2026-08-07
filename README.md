@@ -119,19 +119,6 @@ Matroska is absent from `AVURLAsset.audiovisualTypes()`, so these exist to exerc
 | `sharksandwich.webp` | WebP — readable but not writable, so artwork transcodes to JPEG |
 | `songbird.jpg` | Second image, for collection and comparison tests |
 
-## Architecture
-
-```
-Sources/SPFKTesting/
-  ├── BundleResources.swift        — Generic bundle resource resolver
-  ├── TestBundleResources.swift    — Singleton with named audio/video/image properties
-  ├── Tags+.swift                  — Swift Testing tag extensions
-  └── Resources/
-      ├── audio/                   — 30 audio test files, plus keys/ and rated/
-      ├── video/                   — 6 video test files
-      └── image/                   — 4 image test files
-```
-
 ## Usage
 
 Add SPFKTesting as a dependency in your test target only:
