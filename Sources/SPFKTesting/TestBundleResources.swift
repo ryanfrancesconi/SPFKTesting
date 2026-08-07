@@ -133,6 +133,29 @@ extension TestBundleResources {
         internalResources.resource(named: "tabla.mka")
     }
 
+    /// ``tabla_wav`` encoded as FLAC in Matroska:
+    ///
+    ///     ffmpeg -i tabla.wav -c:a flac \
+    ///       -metadata title="SPFK Tabla Matroska FLAC" -metadata artist="Spongefork" tabla_flac.mka
+    ///
+    /// **Sample-exact against ``tabla_wav``** — 210900 frames, no encoder priming — where
+    /// ``tabla_mka`` is 2112 frames long and shifted later by AAC's. A decoder can be held to the
+    /// samples here rather than to a correlation.
+    public var tabla_flac_mka: URL {
+        internalResources.resource(named: "tabla_flac.mka")
+    }
+
+    /// ``tabla_wav`` stored uncompressed in Matroska, at the source's own 24-bit depth:
+    ///
+    ///     ffmpeg -i tabla.wav -c:a pcm_s24le \
+    ///       -metadata title="SPFK Tabla Matroska PCM" -metadata artist="Spongefork" tabla_pcm.mka
+    ///
+    /// 24-bit deliberately: it is the width `AVAudioPCMBuffer` has no channel-data accessor for, so
+    /// it is the one a PCM path has to widen by hand.
+    public var tabla_pcm_mka: URL {
+        internalResources.resource(named: "tabla_pcm.mka")
+    }
+
     public var tabla_6_channel: URL {
         internalResources.resource(named: "tabla_6_channel.wav")
     }
