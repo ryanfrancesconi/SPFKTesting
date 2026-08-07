@@ -4,13 +4,13 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-testing%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-testing)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-testing%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-testing)
 
-A Swift package providing shared test resources and utilities for all SPFK test targets. Bundles a catalog of audio and image files used across the SPFK ecosystem, with platform-aware resource resolution for macOS and iOS.
+A Swift package providing shared test resources and utilities for all SPFK test targets. Bundles a catalog of audio, video and image files used across the SPFK ecosystem, resolved against either bundle layout SwiftPM produces.
 
 ## Overview
 
 SPFKTesting provides two main components:
 
-- **`TestBundleResources`** — A `Sendable` singleton exposing 30+ named audio and image test files organized into collections by purpose (format coverage, metadata markers, edge cases).
+- **`TestBundleResources`** — A `Sendable` singleton exposing 60+ named audio, video and image test files organized into collections by purpose (format coverage, metadata markers, edge cases).
 - **`Tag` extensions** — Custom Swift Testing tags (`development`, `file`, `automation`, `realtime`, `engine`) for categorizing tests across SPFK modules.
 
 ## Key Types
@@ -29,7 +29,7 @@ let mp3 = resources.mp3_id3
 // Iterate format collections
 for url in resources.formats {
     // tabla.aac, tabla.aif, tabla.caf, tabla.flac,
-    // tabla.m4a, tabla.mp3, tabla.mp4, tabla.ogg, tabla.wav
+    // tabla.m4a, tabla.mp3, tabla.mp4, tabla.wav (+ tabla.ogg on macOS)
 }
 
 for url in resources.markerFormats {
@@ -41,9 +41,13 @@ for url in resources.audioCases {
 }
 ```
 
+`formats` and `markerFormats` are the AVFoundation-openable series. The Matroska members of the tabla series are deliberately outside both, since nothing in AVFoundation can open them — reach them by name (`tabla_mka`, `tabla_flac_mka`, `tabla_pcm_mka`).
+
 ### BundleResources
 
-Generic resource resolver that maps file names to URLs within a bundle. Handles platform-specific bundle directory structures (macOS `Contents/Resources` vs iOS bundle root).
+Generic resource resolver that maps file names to URLs within a bundle.
+
+**The two bundle layouts are a build-system difference, not a platform one.** Xcode writes `Contents/Resources`; SwiftPM's CLI build writes the resources flat at the bundle root. Both occur on macOS, so `resourcesDirectory` asks `Bundle` for its own `resourceURL` rather than appending a path, and a fixture resolves under `xcodebuild` and `swift test` alike.
 
 ```swift
 let br = BundleResources(bundleURL: Bundle.module.bundleURL)
@@ -64,16 +68,22 @@ func displayLinkTiming() { ... }
 
 ## Bundled Resources
 
-### Audio (24 files)
+### Audio (30 files, plus `keys/` and `rated/`)
+
+**The tabla series is same-audio-different-format** — every member is the same performance, so a test can assert one against another. Two caveats live in the series itself: `tabla.aac` and `tabla.m4a` carry encoder priming the container does not declare, so they are offset from the rest, while `tabla_flac.mka` and `tabla_pcm.mka` are sample-exact against `tabla.wav`.
 
 | Resource | Purpose |
 |----------|---------|
-| `tabla.*` (9 formats) | Format coverage: AAC, AIF, CAF, FLAC, M4A, MP3, MP4, OGG, WAV |
+| `tabla.*` (10 formats) | Format coverage: AAC, AIF, CAF, FLAC, M4A, MKA, MP3, MP4, OGG, WAV |
+| `tabla_flac.mka` | FLAC in Matroska — lossless, sample-exact against `tabla.wav` |
+| `tabla_pcm.mka` | 24-bit PCM in Matroska — no converter in the decode path |
 | `tabla_6_channel.wav` | Multi-channel audio |
+| `tabla_legacy_picture.flac` | Legacy XiphComment `METADATA_BLOCK_PICTURE` artwork |
 | `and-oh-how-they-danced.mp3` | ID3 metadata |
 | `and-oh-how-they-danced.wav` | BEXT v2 metadata |
 | `and-oh-how-they-danced_2.wav` | BEXT v2 variant |
-| `123456789bpm60_48k.wav` | BEXT v1, tempo reference |
+| `123456789_60BPM_48k.wav` | BEXT v1, tempo reference |
+| `ITUNSMPB.m4a` | iTunes gapless priming atom |
 | `cowbell.wav` | General audio |
 | `cowbell_bext.wav` | BEXT metadata |
 | `pink_noise.wav` | Signal processing reference |
@@ -81,25 +91,45 @@ func displayLinkTiming() { ... }
 | `xmp.mp3` | XMP metadata |
 | `toc_many_children.mp3` | Complex TOC structure |
 | `no_data_chunk.wav` | Missing data chunk edge case |
-| `usesEntireiXMLSpec.wav` | Full iXML specification |
+| `ixml.wav` | Full iXML specification |
+| `bext_ixml_external.flac` | BEXT and iXML in FLAC APPLICATION blocks |
 | `boom.addAudio` | Custom extension (M4A internally) |
+| `keys/` (12 files) | Musical key detection reference, one per chromatic root |
+| `rated/` (6 files) | 80/100 star rating across WAV, MP3, FLAC, M4A, OGG, AIF |
 
-### Images (1 file)
+### Video (6 files)
+
+Matroska is absent from `AVURLAsset.audiovisualTypes()`, so these exist to exercise the demuxer in `spfk-matroska` — which is also why an audio-only `.mov` is not a substitute for `sample.mov`.
+
+| Resource | Purpose |
+|----------|---------|
+| `sample.mov` | A complete 6 KB QuickTime movie — a real container with a video track |
+| `sample.mkv` | H.264 + AAC in Matroska |
+| `sample.webm` | VP9 + Opus — no `avcC`, so it catches code assuming every track has codec private data |
+| `sample.mka` | Matroska audio with no video track |
+| `sample-nested-seekhead.mkv` | SeekHead pointing at a second SeekHead |
+| `sample-interleaved-cues.mkv` | Cues indexing only the video track, as most muxers write them |
+
+### Images (4 files)
 
 | Resource | Purpose |
 |----------|---------|
 | `sharksandwich.jpg` | Image metadata testing |
+| `sharksandwich.heic` | HEIC read path |
+| `sharksandwich.webp` | WebP — readable but not writable, so artwork transcodes to JPEG |
+| `songbird.jpg` | Second image, for collection and comparison tests |
 
 ## Architecture
 
 ```
 Sources/SPFKTesting/
-  ├── BundleResources.swift        — Generic bundle resource resolver (macOS/iOS)
-  ├── TestBundleResources.swift    — Singleton with named audio/image properties
+  ├── BundleResources.swift        — Generic bundle resource resolver
+  ├── TestBundleResources.swift    — Singleton with named audio/video/image properties
   ├── Tags+.swift                  — Swift Testing tag extensions
   └── Resources/
-      ├── audio/                   — 24 audio test files
-      └── image/                   — 1 image test file
+      ├── audio/                   — 30 audio test files, plus keys/ and rated/
+      ├── video/                   — 6 video test files
+      └── image/                   — 4 image test files
 ```
 
 ## Usage
