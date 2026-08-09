@@ -396,6 +396,50 @@ extension TestBundleResources {
     public var sample_interleaved_cues_mkv: URL {
         internalResources.resource(named: "sample-interleaved-cues.mkv")
     }
+
+    /// ``sample_mov``'s video with **two** audio tracks, for audio track selection:
+    ///
+    ///     ffmpeg -i sample.mov \
+    ///       -f lavfi -t 2.066 -i "sine=frequency=440:sample_rate=44100" \
+    ///       -f lavfi -t 2.066 -i "sine=frequency=880:sample_rate=44100" \
+    ///       -i sub.srt -map 0:v -map 1:a -map 2:a -map 3:s \
+    ///       -filter:a:0 volume=3 -filter:a:1 volume=3 \
+    ///       -c:v copy -c:a aac -b:a 32k -c:s srt \
+    ///       -metadata:s:a:0 language=eng -metadata:s:a:0 title=English \
+    ///       -metadata:s:a:1 language=jpn -metadata:s:a:1 title=Japanese \
+    ///       -metadata:s:s:0 language=eng sample-dualaudio.mkv
+    ///
+    /// **The two tracks are 440 Hz and 880 Hz**, so a test asserts *which* track it decoded rather
+    /// than only that two differ — measure the dominant frequency or count zero crossings, whose
+    /// ratio is exactly 2. Measured after the AAC round trip: 440/879 Hz, peaking 0.53 and 0.69, so
+    /// neither clips.
+    ///
+    /// Identical in every other respect (mono, 44.1 kHz, AAC), which is what isolates the track
+    /// choice as the only variable.
+    ///
+    /// The subtitle track is not decoration: `availableAudioTracks` filters by track kind, and a
+    /// file whose non-audio tracks sit *after* the audio ones is what catches a filter that is
+    /// really an index.
+    public var sample_dualaudio_mkv: URL {
+        internalResources.resource(named: "sample-dualaudio.mkv")
+    }
+
+    /// The AVFoundation counterpart to ``sample_dualaudio_mkv`` — same video, same two tone tracks,
+    /// same names and languages, in a QuickTime container and without the subtitle track.
+    ///
+    /// Both containers are needed because audio track selection is not a Matroska feature: MP4 and
+    /// MOV carry alternate audio as readily, and the two backends select it by unrelated
+    /// mechanisms.
+    ///
+    /// Verified against AVFoundation rather than assumed: the tracks come back with
+    /// `trackID` 2 and 3, `languageCode` `eng`/`jpn`, and the ffmpeg `title` reaching
+    /// `commonMetadata` as `.commonKeyTitle` (stored as `udta/name`). An **audible
+    /// `AVMediaSelectionGroup` is present** with both options, correctly named and localed — so
+    /// this fixture exercises the media-selection route as well as per-track enabling. Whether
+    /// every real-world multi-track movie declares such a group is not established here.
+    public var sample_dualaudio_mov: URL {
+        internalResources.resource(named: "sample-dualaudio.mov")
+    }
 }
 
 // MARK: - Images
