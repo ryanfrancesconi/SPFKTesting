@@ -133,6 +133,39 @@ extension TestBundleResources {
         internalResources.resource(named: "tabla.mka")
     }
 
+    /// Two audio tracks and no video, in Matroska:
+    ///
+    ///     ffmpeg -f lavfi -t 2.066 -i "sine=frequency=440:sample_rate=44100" \
+    ///       -f lavfi -t 2.066 -i "sine=frequency=880:sample_rate=44100" \
+    ///       -map 0:a -map 1:a -filter:a:0 volume=3 -filter:a:1 volume=3 \
+    ///       -c:a aac -b:a 32k \
+    ///       -metadata:s:a:0 language=eng -metadata:s:a:0 title=English \
+    ///       -metadata:s:a:1 language=jpn -metadata:s:a:1 title=Japanese dualaudio.mka
+    ///
+    /// **The absence of a video track is the point.** A `.mka` is `org.matroska.mka`, which conforms
+    /// to `.audio` and not `.movie`, so anything that lists a file's audio tracks behind a video
+    /// test skips it — the shape ``dualaudio_m4a`` shares.
+    ///
+    /// Same tones as ``sample_dualaudio_mkv``: 440 Hz and 880 Hz, mono, 44.1 kHz, AAC, so a test
+    /// asserts *which* track it decoded. Measured after the AAC round trip: 442/886 Hz by zero
+    /// crossing, peaking 0.53 and 0.69, 92160 frames each.
+    public var dualaudio_mka: URL {
+        internalResources.resource(named: "dualaudio.mka")
+    }
+
+    /// The AVFoundation counterpart to ``dualaudio_mka`` — same two tones, same languages, in an
+    /// MP4 audio container that `AVAudioFile(forReading:)` opens and reads the first track of.
+    ///
+    /// **No track names**, unlike every other fixture in this family: ffmpeg's MP4 muxers write no
+    /// `udta/name`, only the QuickTime one does, and a `.mov` renamed `.m4a` would be a fixture
+    /// lying about its own container. Language codes alone are also the common real-world case, so
+    /// this exercises `AudioTrackDescription.displayName`'s language fallback. Verified against
+    /// AVFoundation: two tracks, `trackID` 1 and 2, `languageCode` `eng`/`jpn`, an audible
+    /// `AVMediaSelectionGroup` with both options, 91136 frames each.
+    public var dualaudio_m4a: URL {
+        internalResources.resource(named: "dualaudio.m4a")
+    }
+
     /// ``tabla_wav`` encoded as FLAC in Matroska:
     ///
     ///     ffmpeg -i tabla.wav -c:a flac \
