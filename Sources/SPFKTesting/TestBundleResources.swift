@@ -397,6 +397,25 @@ extension TestBundleResources {
         internalResources.resource(named: "sample-interleaved-cues.mkv")
     }
 
+    /// ``sample_mov`` with a timecode track that the **audio** track references:
+    ///
+    ///     ffmpeg -i sample.mov -timecode 00:00:00:00 -c copy sample-timecode.mov
+    ///
+    /// then a `tref > tmcd` pointing at the timecode track injected into the audio `trak`, since
+    /// ffmpeg writes that reference only on the video track.
+    ///
+    /// **The audio track's pre-existing `tref` is the entire point.** A `trak` may carry only one
+    /// `tref`, and a writer that appends a second rather than merging into it produces a file
+    /// AVFoundation discards the whole track from -- silently, while `ffprobe` still reads it. A
+    /// camera file (GoPro and similar) has exactly this shape, which is why the failure was
+    /// invisible against every fixture whose audio track had no `tref` at all.
+    ///
+    /// Do not "simplify" this to an audio-only file: the timecode track has to exist for the
+    /// reference to resolve.
+    public var sample_timecode_mov: URL {
+        internalResources.resource(named: "sample-timecode.mov")
+    }
+
     /// ``sample_mov``'s video with **two** audio tracks, for audio track selection:
     ///
     ///     ffmpeg -i sample.mov \
