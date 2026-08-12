@@ -449,6 +449,24 @@ extension TestBundleResources {
         internalResources.resource(named: "sample-timecode.mov")
     }
 
+    /// ``sample_mov`` re-encoded to 29.97 with a **drop-frame** timecode track starting one frame
+    /// past the hour:
+    ///
+    ///     ffmpeg -i sample.mov -r 30000/1001 -timecode "01:00:00;01" \
+    ///       -c:v libx264 -crf 40 -pix_fmt yuv420p -c:a copy sample-timecode-offset.mov
+    ///
+    /// Two properties make it the start-timecode fixture, and neither ``sample_timecode_mov`` nor
+    /// any other bundled file has them. The start is **non-zero**, so a reader that discards the
+    /// `tmcd` value and a reader that keeps it disagree. And `01:00:00;01` is **not a whole
+    /// multiple of any label interval**, so a ruler that phases its grid from real-time zero
+    /// instead of from the start renders every label a frame off.
+    ///
+    /// The `;` separator is the drop flag, which is why the rate had to change: ffmpeg refuses a
+    /// drop-frame timecode at a rate that has no drop twin.
+    public var sample_timecode_offset_mov: URL {
+        internalResources.resource(named: "sample-timecode-offset.mov")
+    }
+
     /// ``sample_mov``'s video with **two** audio tracks, for audio track selection:
     ///
     ///     ffmpeg -i sample.mov \
