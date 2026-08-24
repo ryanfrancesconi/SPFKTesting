@@ -34,5 +34,13 @@ extension Tag {
     /// *about*, so a cross-package run can be assembled without naming each suite.
     @Tag public static var undo: Self
 
+    /// The library's persistence layer in either product: what reaches disk, what is read back,
+    /// and everything derived from it -- the shared store, its derived index, smart selection,
+    /// migration, bookmarks, and the caches keyed off the set of files the library holds.
+    ///
+    /// Assembles the run for a change to that layer. The per-package plans each show a fraction of
+    /// it, and the landing gate shows it alongside everything else.
+    @Tag public static var persistence: Self
+
     @Tag public static var automation: Self
 }
