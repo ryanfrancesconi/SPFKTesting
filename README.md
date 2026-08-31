@@ -17,58 +17,27 @@ SPFKTesting provides two main components:
 
 ### TestBundleResources
 
-Singleton providing typed access to bundled test resources. Used by downstream packages for audio format testing, metadata parsing, and file I/O validation.
-
-```swift
-let resources = TestBundleResources.shared
-
-// Access individual files
-let wav = resources.tabla_wav
-let mp3 = resources.mp3_id3
-
-// Iterate format collections
-for url in resources.formats {
-    // tabla.aac, tabla.aif, tabla.caf, tabla.flac,
-    // tabla.m4a, tabla.mp3, tabla.mp4, tabla.wav (+ tabla.ogg on macOS)
-}
-
-for url in resources.markerFormats {
-    // Formats supporting RIFF/Chapter markers and metadata
-}
-
-for url in resources.audioCases {
-    // Diverse set for broad audio testing
-}
-```
+Singleton providing typed access to bundled test resources — individual files by name, plus the
+collections `formats`, `markerFormats` and `audioCases` for iterating a series. Used by downstream
+packages for audio format testing, metadata parsing and file I/O validation. `AudioTestFile` names
+the audio members as an enum.
 
 `formats` and `markerFormats` are the AVFoundation-openable series. The Matroska members of the tabla series are deliberately outside both, since nothing in AVFoundation can open them — reach them by name (`tabla_mka`, `tabla_flac_mka`, `tabla_pcm_mka`).
 
 ### BundleResources
 
-Generic resource resolver that maps file names to URLs within a bundle.
+Generic resource resolver mapping file names to URLs within a bundle.
 
 **The two bundle layouts are a build-system difference, not a platform one.** Xcode writes `Contents/Resources`; SwiftPM's CLI build writes the resources flat at the bundle root. Both occur on macOS, so `resourcesDirectory` asks `Bundle` for its own `resourceURL` rather than appending a path, and a fixture resolves under `xcodebuild` and `swift test` alike.
 
-```swift
-let br = BundleResources(bundleURL: Bundle.module.bundleURL)
-let url = br.resource(named: "tabla.wav")
-```
-
 ### Test Tags
 
-Custom tags for filtering test execution in Swift Testing test plans:
-
-```swift
-@Test(.tags(.file))
-func readWavMetadata() { ... }
-
-@Test(.tags(.realtime))
-func displayLinkTiming() { ... }
-```
+Custom tags for filtering test execution in Swift Testing test plans: `development`, `file`,
+`automation`, `realtime` and `engine`.
 
 ## Bundled Resources
 
-### Audio (30 files, plus `keys/` and `rated/`)
+### Audio (31 files, plus `keys/` and `rated/`)
 
 **The tabla series is same-audio-different-format** — every member is the same performance, so a test can assert one against another. Two caveats live in the series itself: `tabla.aac` and `tabla.m4a` carry encoder priming the container does not declare, so they are offset from the rest, while `tabla_flac.mka` and `tabla_pcm.mka` are sample-exact against `tabla.wav`.
 
@@ -94,10 +63,12 @@ func displayLinkTiming() { ... }
 | `ixml.wav` | Full iXML specification |
 | `bext_ixml_external.flac` | BEXT and iXML in FLAC APPLICATION blocks |
 | `boom.addAudio` | Custom extension (M4A internally) |
+| `dualaudio.m4a` | Two audio tracks — track selection in an AVFoundation container |
+| `dualaudio.mka` | Two audio tracks — track selection through the demuxer |
 | `keys/` (12 files) | Musical key detection reference, one per chromatic root |
 | `rated/` (6 files) | 80/100 star rating across WAV, MP3, FLAC, M4A, OGG, AIF |
 
-### Video (6 files)
+### Video (10 files)
 
 Matroska is absent from `AVURLAsset.audiovisualTypes()`, so these exist to exercise the demuxer in `spfk-matroska` — which is also why an audio-only `.mov` is not a substitute for `sample.mov`.
 
@@ -109,6 +80,8 @@ Matroska is absent from `AVURLAsset.audiovisualTypes()`, so these exist to exerc
 | `sample.mka` | Matroska audio with no video track |
 | `sample-nested-seekhead.mkv` | SeekHead pointing at a second SeekHead |
 | `sample-interleaved-cues.mkv` | Cues indexing only the video track, as most muxers write them |
+| `sample-dualaudio.mkv` / `sample-dualaudio.mov` | Two audio tracks in each container, for the track picker |
+| `sample-timecode.mov` / `sample-timecode-offset.mov` | A timecode track, at zero and at an offset |
 
 ### Images (4 files)
 
@@ -119,7 +92,7 @@ Matroska is absent from `AVURLAsset.audiovisualTypes()`, so these exist to exerc
 | `sharksandwich.webp` | WebP — readable but not writable, so artwork transcodes to JPEG |
 | `songbird.jpg` | Second image, for collection and comparison tests |
 
-## Usage
+## Installation
 
 Add SPFKTesting as a dependency in your test target only:
 
