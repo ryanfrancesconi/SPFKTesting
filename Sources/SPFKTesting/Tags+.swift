@@ -42,5 +42,13 @@ extension Tag {
     /// it, and the landing gate shows it alongside everything else.
     @Tag public static var persistence: Self
 
+    /// Opening a playlist: what a first paint costs, what fills in behind it, and everything that
+    /// has to wait for or re-run after that fill-in — the store's shell read and hydration, the
+    /// host's step order, and the table's application of a batch.
+    ///
+    /// Spans the store, the shared host and both products' tables, which is why it is a tag rather
+    /// than a suite list.
+    @Tag public static var albumLoad: Self
+
     @Tag public static var automation: Self
 }
