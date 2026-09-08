@@ -510,6 +510,34 @@ extension TestBundleResources {
     public var sample_dualaudio_mov: URL {
         internalResources.resource(named: "sample-dualaudio.mov")
     }
+
+    /// ``sample_mov``'s video in an MXF container, with a tone in place of its audio:
+    ///
+    ///     ffmpeg -y -i sample.mov -f lavfi -t 2 -i "sine=frequency=440:sample_rate=48000" \
+    ///       -map 0:v -map 1:a -c:v mpeg2video -b:v 300k -c:a pcm_s16le -shortest sample.mxf
+    ///
+    /// **Nothing opens this without `ProVideoFormats.register()`** — MXF is absent from
+    /// `AVURLAsset.audiovisualTypes()` until the process opts into macOS's professional video
+    /// workflow plug-ins, and those ship in a separate Apple download. That is what the fixture is
+    /// for, so any test using it must be gated on `ProVideoFormats.isAvailable`.
+    ///
+    /// A re-encode rather than the `-c copy` used for ``sample_mkv``: the MXF muxer takes neither
+    /// H.264 nor AAC, so this is MPEG-2 video and uncompressed PCM, and the streams are not
+    /// bit-identical to the `.mov`. It stays 160x120 and 2 seconds with ``sample_mov``'s visibly
+    /// distinct frames, so a thumbnail-at-timestamp test can still assert *which* frame it got.
+    ///
+    /// **The audio is a tone rather than ``sample_mov``'s own track**, because that track is
+    /// digital silence — the trap ``tabla_mka`` exists for, and a worse one here: a wrong ASBD
+    /// decodes silence while reporting success at every step, so against a silent fixture a
+    /// decode test cannot tell the two apart. Measured through `AVAssetReader` as deinterleaved
+    /// 32-bit float: 96000 frames, 48 kHz mono, peak 0.125, 439.5 Hz by zero crossing.
+    ///
+    /// MPEG-2 rather than DNxHD deliberately — a DNxHD fixture is 7.5 MB, and the format reader is
+    /// the part under test either way. At 285 KB this is still the largest fixture here, almost all
+    /// of it the uncompressed PCM.
+    public var sample_mxf: URL {
+        internalResources.resource(named: "sample.mxf")
+    }
 }
 
 // MARK: - Images
